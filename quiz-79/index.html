@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akademia Dobrych Zasad — Giganci Programowania</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #F58220;
+    --purple: #6F499D;
+    --orange-light: #F8E2CB;
+    --purple-light: #D4CFE5;
+    --purple-mid: #B4A8CE;
+    --bg: #FFFAF5;
+    --text: #2D2D2D;
+    --correct: #4CAF50;
+    --wrong: #E74C3C;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === HEADER === */
+  .header {
+    background: linear-gradient(135deg, var(--purple) 0%, var(--orange) 100%);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      120deg,
+      rgba(255,255,255,0.04) 0px,
+      rgba(255,255,255,0.04) 2px,
+      transparent 2px,
+      transparent 20px
+    );
+  }
+  .header h1 {
+    font-size: clamp(1.7rem, 5vw, 2.6rem);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.18);
+    position: relative;
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    color: rgba(255,255,255,0.92);
+    font-size: clamp(1rem, 2.8vw, 1.25rem);
+    font-weight: 700;
+    margin-top: 6px;
+    position: relative;
+  }
+
+  /* === EMOJI BANK === */
+  .emoji-bank {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 24px 16px 10px;
+  }
+  .emoji-block {
+    width: 72px; height: 72px;
+    font-size: 38px;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff;
+    border: 4px solid var(--orange);
+    border-radius: 18px;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.18s, box-shadow 0.18s, opacity 0.25s;
+    box-shadow: 0 4px 14px rgba(245,130,32,0.18);
+    position: relative;
+  }
+  .emoji-block:active { cursor: grabbing; }
+  .emoji-block:hover {
+    transform: scale(1.12) rotate(-3deg);
+    box-shadow: 0 6px 22px rgba(245,130,32,0.3);
+  }
+  .emoji-block.placed {
+    opacity: 0.3;
+    pointer-events: none;
+    transform: scale(0.9);
+  }
+  .emoji-block.shake {
+    animation: shake 0.45s ease;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px) rotate(-4deg); }
+    40% { transform: translateX(8px) rotate(4deg); }
+    60% { transform: translateX(-5px) rotate(-2deg); }
+    80% { transform: translateX(5px) rotate(2deg); }
+  }
+
+  /* === SENTENCES === */
+  .sentences {
+    padding: 14px 16px 20px;
+    max-width: 740px;
+    margin: 0 auto;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .sentence-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px 22px;
+    font-size: clamp(1.15rem, 3.2vw, 1.45rem);
+    font-weight: 800;
+    line-height: 1.7;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    box-shadow: 0 3px 16px rgba(111,73,157,0.1);
+    border-left: 6px solid var(--purple);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .sentence-card.correct {
+    border-left-color: var(--correct);
+    box-shadow: 0 3px 20px rgba(76,175,80,0.2);
+  }
+  .sentence-card.wrong {
+    border-left-color: var(--wrong);
+    box-shadow: 0 3px 20px rgba(231,76,60,0.2);
+  }
+
+  .slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px; height: 62px;
+    border: 4px dashed var(--purple-mid);
+    border-radius: 16px;
+    background: var(--purple-light);
+    font-size: 34px;
+    margin: 2px 4px;
+    transition: all 0.25s;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .slot.drag-over {
+    border-color: var(--orange);
+    background: var(--orange-light);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(245,130,32,0.35);
+  }
+  .slot.filled {
+    border-style: solid;
+    border-color: var(--orange);
+    background: #FFF5EB;
+    cursor: pointer;
+  }
+  .slot.correct-slot {
+    border-color: var(--correct) !important;
+    background: #E8F5E9 !important;
+  }
+  .slot.wrong-slot {
+    border-color: var(--wrong) !important;
+    background: #FFEBEE !important;
+    animation: shake 0.45s ease;
+  }
+
+  .text-part { white-space: pre-wrap; }
+
+  /* === BUTTON === */
+  .btn-area {
+    text-align: center;
+    padding: 20px 16px 40px;
+  }
+  .btn-check {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+    font-weight: 900;
+    color: #fff;
+    background: linear-gradient(135deg, var(--orange) 0%, #e06b0a 100%);
+    border: none;
+    padding: 16px 52px;
+    border-radius: 60px;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(245,130,32,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-check:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 10px 32px rgba(245,130,32,0.45);
+  }
+  .btn-check:active { transform: scale(0.97); }
+  .btn-check:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* === RESULT === */
+  .result-msg {
+    text-align: center;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    font-weight: 900;
+    padding: 0 16px 10px;
+    min-height: 48px;
+    transition: opacity 0.35s;
+  }
+  .result-msg.success { color: var(--correct); }
+  .result-msg.retry { color: var(--orange); }
+
+  /* === CONFETTI === */
+  .confetti-container {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 12px; height: 12px;
+    top: -20px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg) scale(0.4); opacity: 0; }
+  }
+
+  /* === MOBILE TOUCH GHOST === */
+  .drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    font-size: 44px;
+    width: 72px; height: 72px;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff;
+    border: 4px solid var(--orange);
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(245,130,32,0.4);
+    transform: translate(-50%, -50%) scale(1.15);
+    transition: none;
+  }
+
+  /* === STARS BG DECO === */
+  .deco-star {
+    position: fixed;
+    opacity: 0.07;
+    font-size: 60px;
+    pointer-events: none;
+    z-index: 0;
+    animation: float 6s ease-in-out infinite alternate;
+  }
+  @keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-18px) rotate(15deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Decorative background stars -->
+<div class="deco-star" style="top:12%;left:5%;animation-delay:0s;">⭐</div>
+<div class="deco-star" style="top:45%;right:4%;animation-delay:1.5s;font-size:45px;">🌟</div>
+<div class="deco-star" style="bottom:18%;left:8%;animation-delay:3s;font-size:50px;">✨</div>
+<div class="deco-star" style="top:70%;right:10%;animation-delay:2s;font-size:40px;">⭐</div>
+
+<div class="header">
+  <h1>📚 Akademia Dobrych Zasad</h1>
+  <p>Przeciągnij emoji w odpowiednie miejsce!</p>
+</div>
+
+<!-- Emoji Bank -->
+<div class="emoji-bank" id="emojiBank"></div>
+
+<!-- Sentences -->
+<div class="sentences" id="sentences"></div>
+
+<!-- Result -->
+<div class="result-msg" id="resultMsg"></div>
+
+<!-- Button -->
+<div class="btn-area">
+  <button class="btn-check" id="btnCheck" onclick="checkAnswers()">Sprawdź ✅</button>
+</div>
+
+<!-- Confetti container -->
+<div class="confetti-container" id="confettiBox"></div>
+
+<script>
+  // ========== DATA ==========
+  const quizData = [
+    {
+      parts: ['Na zajęcia mamy przygotowany ', null, ' i ', null, '.'],
+      answers: ['🖥️', '🖱️'],
+      interchangeable: true
+    },
+    {
+      parts: ['Zgłaszamy się przez podniesienie ', null, '.'],
+      answers: ['✋']
+    },
+    {
+      parts: ['Gdy ktoś mówi, ', null, ' i nie przerywamy.'],
+      answers: ['👂']
+    },
+    {
+      parts: ['', null, ' włączamy wtedy, gdy chcemy coś powiedzieć.'],
+      answers: ['🎤']
+    }
+  ];
+
+  const allEmojis = ['🖥️', '🖱️', '✋', '👂', '🎤'];
+
+  // ========== STATE ==========
+  let slotValues = {};   // slotId -> emoji
+  let lockedSlots = new Set(); // correct slots that are locked
+  let dragData = null;   // { emoji, sourceSlot? }
+
+  // ========== INIT ==========
+  function init() {
+    renderBank();
+    renderSentences();
+  }
+
+  // Shuffle array
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function renderBank() {
+    const bank = document.getElementById('emojiBank');
+    bank.innerHTML = '';
+    const shuffled = shuffle(allEmojis);
+    shuffled.forEach(emoji => {
+      const el = document.createElement('div');
+      el.className = 'emoji-block';
+      el.textContent = emoji;
+      el.draggable = true;
+      el.dataset.emoji = emoji;
+
+      // Desktop drag
+      el.addEventListener('dragstart', e => {
+        dragData = { emoji, sourceSlot: null };
+        e.dataTransfer.setData('text/plain', emoji);
+        setTimeout(() => el.classList.add('placed'), 0);
+      });
+      el.addEventListener('dragend', e => {
+        if (!isEmojiInAnySlot(emoji)) {
+          el.classList.remove('placed');
+        }
+        dragData = null;
+      });
+
+      // Touch drag
+      el.addEventListener('touchstart', e => handleTouchStart(e, emoji, null), { passive: false });
+
+      bank.appendChild(el);
+    });
+  }
+
+  function renderSentences() {
+    const container = document.getElementById('sentences');
+    container.innerHTML = '';
+    let slotIndex = 0;
+
+    quizData.forEach((item, qi) => {
+      const card = document.createElement('div');
+      card.className = 'sentence-card';
+      card.dataset.qi = qi;
+
+      item.parts.forEach((part, pi) => {
+        if (part === null) {
+          const slot = document.createElement('div');
+          const sid = `slot-${slotIndex}`;
+          slot.className = 'slot';
+          slot.id = sid;
+          slot.dataset.answer = item.answers[Math.floor(pi / 2)];
+          slot.dataset.slotIndex = slotIndex;
+
+          // Count which answer index within this sentence
+          let ansIdx = 0;
+          for (let k = 0; k < pi; k++) {
+            if (item.parts[k] === null) ansIdx++;
+          }
+          slot.dataset.answer = item.answers[ansIdx];
+          slot.dataset.qi = qi;
+
+          // Desktop drop
+          slot.addEventListener('dragover', e => {
+            if (lockedSlots.has(sid)) return;
+            e.preventDefault();
+            slot.classList.add('drag-over');
+          });
+          slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+          slot.addEventListener('drop', e => {
+            e.preventDefault();
+            slot.classList.remove('drag-over');
+            if (lockedSlots.has(sid)) return;
+            const emoji = e.dataTransfer.getData('text/plain') || (dragData && dragData.emoji);
+            if (!emoji) return;
+            placeEmoji(sid, emoji, dragData ? dragData.sourceSlot : null);
+          });
+
+          // Click to remove
+          slot.addEventListener('click', () => {
+            if (lockedSlots.has(sid)) return;
+            if (slotValues[sid]) {
+              removeEmoji(sid);
+            }
+          });
+
+          // Touch drop target handled globally
+          slot.addEventListener('touchend', e => e.preventDefault());
+
+          slotIndex++;
+          card.appendChild(slot);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'text-part';
+          span.textContent = part;
+          card.appendChild(span);
+        }
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+  function placeEmoji(slotId, emoji, sourceSlot) {
+    // If slot already has an emoji, return old one to bank
+    if (slotValues[slotId]) {
+      returnToBank(slotValues[slotId]);
+    }
+    // If emoji came from another slot, clear that slot
+    if (sourceSlot && slotValues[sourceSlot] === emoji) {
+      slotValues[sourceSlot] = null;
+      document.getElementById(sourceSlot).textContent = '';
+      document.getElementById(sourceSlot).classList.remove('filled');
+    }
+    // If emoji is in a different slot, remove from there
+    for (const [sid, val] of Object.entries(slotValues)) {
+      if (val === emoji && sid !== slotId && !lockedSlots.has(sid)) {
+        slotValues[sid] = null;
+        document.getElementById(sid).textContent = '';
+        document.getElementById(sid).classList.remove('filled');
+      }
+    }
+
+    slotValues[slotId] = emoji;
+    const slotEl = document.getElementById(slotId);
+    slotEl.textContent = emoji;
+    slotEl.classList.add('filled');
+    slotEl.classList.remove('wrong-slot');
+
+    markBankState();
+    clearResult();
+  }
+
+  function removeEmoji(slotId) {
+    const emoji = slotValues[slotId];
+    if (!emoji) return;
+    slotValues[slotId] = null;
+    const slotEl = document.getElementById(slotId);
+    slotEl.textContent = '';
+    slotEl.classList.remove('filled', 'wrong-slot');
+    returnToBank(emoji);
+    clearResult();
+  }
+
+  function returnToBank(emoji) {
+    // only return if not in any other slot
+    if (isEmojiInAnySlot(emoji)) return;
+    const blocks = document.querySelectorAll('.emoji-block');
+    blocks.forEach(b => {
+      if (b.dataset.emoji === emoji) b.classList.remove('placed');
+    });
+  }
+
+  function markBankState() {
+    const blocks = document.querySelectorAll('.emoji-block');
+    blocks.forEach(b => {
+      if (isEmojiInAnySlot(b.dataset.emoji)) {
+        b.classList.add('placed');
+      } else {
+        b.classList.remove('placed');
+      }
+    });
+  }
+
+  function isEmojiInAnySlot(emoji) {
+    return Object.values(slotValues).includes(emoji);
+  }
+
+  function clearResult() {
+    document.getElementById('resultMsg').textContent = '';
+    document.getElementById('resultMsg').className = 'result-msg';
+    document.querySelectorAll('.sentence-card').forEach(c => {
+      c.classList.remove('correct', 'wrong');
+    });
+  }
+
+  // ========== CHECK ==========
+  function checkAnswers() {
+    const slots = document.querySelectorAll('.slot');
+    let allFilled = true;
+    slots.forEach(s => {
+      if (!lockedSlots.has(s.id) && !slotValues[s.id]) allFilled = false;
+    });
+
+    if (!allFilled) {
+      document.getElementById('resultMsg').textContent = '⬆️ Uzupełnij wszystkie luki!';
+      document.getElementById('resultMsg').className = 'result-msg retry';
+      return;
+    }
+
+    let allCorrect = true;
+
+    // Group slots by sentence (qi)
+    const groups = {};
+    slots.forEach(s => {
+      const qi = s.dataset.qi;
+      if (!groups[qi]) groups[qi] = [];
+      groups[qi].push(s);
+    });
+
+    for (const [qi, slotsInGroup] of Object.entries(groups)) {
+      const item = quizData[parseInt(qi)];
+      const unlockedSlots = slotsInGroup.filter(s => !lockedSlots.has(s.id));
+      if (unlockedSlots.length === 0) continue;
+
+      if (item.interchangeable) {
+        // Check if set of given emojis matches set of expected answers
+        const givenSet = unlockedSlots.map(s => slotValues[s.id]).sort().join(',');
+        const expectedSet = item.answers.slice().sort().join(',');
+        // Also check each given is in the answers set
+        const givenEmojis = unlockedSlots.map(s => slotValues[s.id]);
+        const answersLeft = [...item.answers];
+        // Remove already-locked answers
+        slotsInGroup.forEach(s => {
+          if (lockedSlots.has(s.id)) {
+            const idx = answersLeft.indexOf(slotValues[s.id]);
+            if (idx !== -1) answersLeft.splice(idx, 1);
+          }
+        });
+
+        const allMatch = givenEmojis.every(e => answersLeft.includes(e)) &&
+                          answersLeft.every(e => givenEmojis.includes(e));
+
+        if (allMatch) {
+          unlockedSlots.forEach(s => {
+            s.classList.add('correct-slot');
+            s.classList.remove('wrong-slot');
+            lockedSlots.add(s.id);
+            markCardStatus(s);
+          });
+        } else {
+          allCorrect = false;
+          unlockedSlots.forEach(s => {
+            s.classList.add('wrong-slot');
+            s.classList.remove('correct-slot');
+            setTimeout(() => {
+              if (!lockedSlots.has(s.id)) {
+                const wrongEmoji = slotValues[s.id];
+                slotValues[s.id] = null;
+                s.textContent = '';
+                s.classList.remove('filled', 'wrong-slot');
+                returnToBank(wrongEmoji);
+                markBankState();
+              }
+            }, 900);
+          });
+        }
+      } else {
+        // Normal per-slot check
+        unlockedSlots.forEach(s => {
+          const correct = s.dataset.answer;
+          const given = slotValues[s.id];
+          if (given === correct) {
+            s.classList.add('correct-slot');
+            s.classList.remove('wrong-slot');
+            lockedSlots.add(s.id);
+            markCardStatus(s);
+          } else {
+            allCorrect = false;
+            s.classList.add('wrong-slot');
+            s.classList.remove('correct-slot');
+            setTimeout(() => {
+              if (!lockedSlots.has(s.id)) {
+                const wrongEmoji = slotValues[s.id];
+                slotValues[s.id] = null;
+                s.textContent = '';
+                s.classList.remove('filled', 'wrong-slot');
+                returnToBank(wrongEmoji);
+                markBankState();
+              }
+            }, 900);
+          }
+        });
+      }
+    }
+
+    if (allCorrect) {
+      document.getElementById('resultMsg').innerHTML = '🎉 Brawo! Wszystko dobrze! 🎉';
+      document.getElementById('resultMsg').className = 'result-msg success';
+      document.getElementById('btnCheck').disabled = true;
+      launchConfetti();
+    } else {
+      document.getElementById('resultMsg').textContent = '🤔 Prawie! Spróbuj jeszcze raz!';
+      document.getElementById('resultMsg').className = 'result-msg retry';
+    }
+  }
+
+  function markCardStatus(slotEl) {
+    const card = slotEl.closest('.sentence-card');
+    const slotsInCard = card.querySelectorAll('.slot');
+    const allDone = [...slotsInCard].every(s => lockedSlots.has(s.id));
+    if (allDone) card.classList.add('correct');
+  }
+
+  // ========== CONFETTI ==========
+  function launchConfetti() {
+    const box = document.getElementById('confettiBox');
+    const colors = ['#F58220', '#6F499D', '#4CAF50', '#FFD700', '#E74C3C', '#00BCD4', '#FF4081'];
+    const shapes = ['●', '■', '▲', '★', '♦'];
+
+    for (let i = 0; i < 120; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.color = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.fontSize = (Math.random() * 16 + 10) + 'px';
+      piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      piece.style.animationDelay = (Math.random() * 1.5) + 's';
+      box.appendChild(piece);
+    }
+
+    setTimeout(() => { box.innerHTML = ''; }, 5000);
+  }
+
+  // ========== TOUCH HANDLING ==========
+  let touchGhost = null;
+  let touchEmoji = null;
+  let touchSourceSlot = null;
+
+  function handleTouchStart(e, emoji, sourceSlot) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchEmoji = emoji;
+    touchSourceSlot = sourceSlot;
+
+    // Create ghost
+    touchGhost = document.createElement('div');
+    touchGhost.className = 'drag-ghost';
+    touchGhost.textContent = emoji;
+    document.body.appendChild(touchGhost);
+    moveGhost(touch.clientX, touch.clientY);
+
+    // Mark as placed in bank
+    if (!sourceSlot) {
+      document.querySelectorAll('.emoji-block').forEach(b => {
+        if (b.dataset.emoji === emoji) b.classList.add('placed');
+      });
+    }
+
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd);
+  }
+
+  function handleTouchMove(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    moveGhost(touch.clientX, touch.clientY);
+
+    // Highlight slot under finger
+    document.querySelectorAll('.slot').forEach(s => s.classList.remove('drag-over'));
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (el && el.classList.contains('slot') && !lockedSlots.has(el.id)) {
+      el.classList.add('drag-over');
+    }
+  }
+
+  function handleTouchEnd(e) {
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+
+    if (touchGhost) {
+      touchGhost.remove();
+      touchGhost = null;
+    }
+
+    // Find slot under touch
+    const touch = e.changedTouches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    document.querySelectorAll('.slot').forEach(s => s.classList.remove('drag-over'));
+
+    if (el && el.classList.contains('slot') && !lockedSlots.has(el.id) && touchEmoji) {
+      placeEmoji(el.id, touchEmoji, touchSourceSlot);
+    } else {
+      // Return to bank if not dropped on slot
+      if (touchSourceSlot) {
+        // was from a slot, put back
+      } else {
+        returnToBank(touchEmoji);
+        markBankState();
+      }
+    }
+
+    touchEmoji = null;
+    touchSourceSlot = null;
+  }
+
+  function moveGhost(x, y) {
+    if (!touchGhost) return;
+    touchGhost.style.left = x + 'px';
+    touchGhost.style.top = y + 'px';
+  }
+
+  // Allow touch-dragging from filled slots
+  document.addEventListener('touchstart', e => {
+    const el = e.target;
+    if (el.classList.contains('slot') && el.classList.contains('filled') && !lockedSlots.has(el.id)) {
+      const emoji = slotValues[el.id];
+      if (emoji) {
+        slotValues[el.id] = null;
+        el.textContent = '';
+        el.classList.remove('filled');
+        handleTouchStart(e, emoji, el.id);
+      }
+    }
+  }, { passive: false });
+
+  // ========== GO ==========
+  init();
+</script>
+</body>
+</html>
