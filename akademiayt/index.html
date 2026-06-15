@@ -1,0 +1,601 @@
+import { useState, useEffect } from "react";
+
+const ORANGE = "#F58220";
+const PURPLE = "#6F499D";
+const GREEN = "#2e7d32";
+
+const topics = [
+  // === LANDSCAPE ===
+  {
+    title: "🏔️ Panorama gór z wakacji",
+    hint: "Góry rozciągają się szeroko na horyzoncie, dolina w tle...",
+    best: "landscape",
+    explanation: "Panorama gór to klasyka poziomego kadru — szeroki krajobraz wygląda najlepiej w 16:9!"
+  },
+  {
+    title: "🎮 Gameplay z Minecrafta na YouTube",
+    hint: "Ekran gry komputerowej, pasek narzędzi, mapa, HUD...",
+    best: "landscape",
+    explanation: "Gry komputerowe mają interfejs 16:9 — nagrywanie ekranu MUSI być poziome!"
+  },
+  {
+    title: "⚽ Relacja z meczu piłki nożnej",
+    hint: "Zawodnicy biegają po szerokim boisku, podania z lewej na prawą...",
+    best: "landscape",
+    explanation: "Boisko jest szerokie — poziomy kadr pozwala śledzić akcję i podania między zawodnikami!"
+  },
+  {
+    title: "🎬 Krótki film fabularny na YouTube",
+    hint: "Sceny z dialogami, plenerami, zbliżeniami aktorów...",
+    best: "landscape",
+    explanation: "Filmy fabularne mają proporcje kinowe 16:9 — poziomy kadr daje profesjonalny efekt!"
+  },
+  {
+    title: "🌅 Timelapse zachodu słońca",
+    hint: "Niebo zmienia kolory nad szerokim horyzontem morza...",
+    best: "landscape",
+    explanation: "Horyzont + szerokie niebo = poziomy kadr oddaje pełnię zachodu słońca!"
+  },
+  {
+    title: "🖥️ Tutorial programowania na Twitchu",
+    hint: "Ekran z kodem, IDE, terminal, przeglądarka obok...",
+    best: "landscape",
+    explanation: "Ekran komputera jest poziomy — stream z programowaniem wymaga 16:9 żeby kod był czytelny!"
+  },
+  {
+    title: "🏎️ Wyścig gokartów — kamera na torze",
+    hint: "Gokarty pędzą po szerokim torze, kamera na zakręcie...",
+    best: "landscape",
+    explanation: "Tor wyścigowy jest szeroki — poziomy kadr łapie dynamikę jazdy i kilka gokartów naraz!"
+  },
+  {
+    title: "🎓 Nagranie prezentacji szkolnej z tablicą",
+    hint: "Nauczyciel stoi przy tablicy, slajdy wyświetlone na projektorze...",
+    best: "landscape",
+    explanation: "Tablica i slajdy są szerokie — poziomy kadr mieści i osobę, i treść prezentacji!"
+  },
+  {
+    title: "🎸 Koncert zespołu w sali",
+    hint: "Cały zespół na scenie: gitarzysta, perkusista, wokalista...",
+    best: "landscape",
+    explanation: "Scena jest szeroka — poziomy kadr obejmuje cały zespół i klimat koncertu!"
+  },
+  {
+    title: "📺 Podcast wideo z dwoma osobami",
+    hint: "Dwie osoby siedzą naprzeciwko siebie, rozmawiają przy biurku...",
+    best: "landscape",
+    explanation: "Dwóch rozmówców obok siebie wymaga szerokiego kadru — klasyczny format podcastów na YouTube!"
+  },
+  // === PORTRAIT ===
+  {
+    title: "💃 Taniec TikTokowy z choreografią",
+    hint: "Osoba tańczy na środku kadru, pełna postać od stóp do głowy...",
+    best: "portrait",
+    explanation: "TikTok to format pionowy 9:16 — pełna sylwetka tancerza idealnie się mieści!"
+  },
+  {
+    title: "🍳 Przepis krok po kroku na Instagram Reels",
+    hint: "Szybki tutorial kulinarny na telefon, ręce nad garnkiem...",
+    best: "portrait",
+    explanation: "Reels na Instagramie wyświetlają się pionowo — pionowy kadr wypełni cały ekran telefonu!"
+  },
+  {
+    title: "🗣️ Vlog \"dzień z mojego życia\" na TikToku",
+    hint: "Mówisz do kamery trzymanej w ręce, selfie-styl...",
+    best: "portrait",
+    explanation: "Vlogi na TikToka trzyma się telefon pionowo — naturalny selfie-styl idealny na 9:16!"
+  },
+  {
+    title: "🏗️ Wysoki wieżowiec od dołu do góry",
+    hint: "Kamera jedzie od fundamentów do szczytu budynku...",
+    best: "portrait",
+    explanation: "Wysoki budynek wygląda najlepiej w pionie — pionowy kadr podkreśla imponującą wysokość!"
+  },
+  {
+    title: "🛍️ Haul zakupowy na YouTube Shorts",
+    hint: "Pokazujesz po kolei ubrania, przymierzasz, kręcisz się...",
+    best: "portrait",
+    explanation: "YouTube Shorts to format pionowy — pełna sylwetka w ubraniach idealnie pasuje do 9:16!"
+  },
+  {
+    title: "📖 BeReal — zdjęcie w bibliotece",
+    hint: "Szybki, spontaniczny moment, selfie w lustrze, trzymasz telefon...",
+    best: "portrait",
+    explanation: "BeReal to apka na telefon — naturalny pionowy format, bo trzymasz telefon jedną ręką!"
+  },
+  {
+    title: "🧗 Wspinaczka na ściance",
+    hint: "Osoba wspina się po wysokiej ściance, kamera patrzy od dołu w górę...",
+    best: "portrait",
+    explanation: "Ścianka jest wysoka — pionowy kadr łapie całą trasę wspinaczki od dołu do góry!"
+  },
+  {
+    title: "🎤 Karaoke challenge na Instagramie",
+    hint: "Śpiewasz do kamery, tekst wyświetla się u dołu, twarz z bliska...",
+    best: "portrait",
+    explanation: "Instagram Stories i Reels to pion — twarz z bliska + tekst idealnie wypełniają ekran 9:16!"
+  },
+  {
+    title: "🌊 Wodospad w lesie deszczowym",
+    hint: "Woda spada z wysoka, strumień leci pionowo w dół, mgła dookoła...",
+    best: "portrait",
+    explanation: "Wodospad jest wysoki i wąski — pionowy kadr oddaje pełną wysokość spadającej wody!"
+  },
+  {
+    title: "📲 Screencast z aplikacji mobilnej",
+    hint: "Pokazujesz jak działa apka na telefonie, klikasz, przewijasz...",
+    best: "portrait",
+    explanation: "Ekran telefonu jest pionowy — nagrywanie apki mobilnej wymaga pionowego formatu!"
+  },
+  // === BOTH ===
+  {
+    title: "🐱 Filmik z kotem dla znajomych",
+    hint: "Twój kot robi śmieszne rzeczy — może leżeć, biegać, skakać...",
+    best: "both",
+    explanation: "Kot jest mały i nieprzewidywalny — oba formaty działają! Poziomo na YouTube, pionowo na TikToka. Zależy, gdzie chcesz to wrzucić."
+  },
+  {
+    title: "🎂 Nagranie z urodzin kolegi",
+    hint: "Tort, świeczki, śpiewanie, prezenty, grupa ludzi...",
+    best: "both",
+    explanation: "Oba są OK! Poziomo obejmiesz całą grupę przy stole, pionowo — świetne na InstaStory relację na żywo."
+  },
+  {
+    title: "📱 Recenzja nowego telefonu",
+    hint: "Pokazujesz telefon z bliska, obracasz go, testujesz ekran...",
+    best: "both",
+    explanation: "Zależy od platformy! Na YouTube recenzje są poziome (16:9), ale na TikToku/Shorts — pionowe. Treść ta sama, format inny."
+  },
+  {
+    title: "🎵 Cover piosenki — grasz na gitarze i śpiewasz",
+    hint: "Siedzisz z gitarą, śpiewasz do kamery...",
+    best: "both",
+    explanation: "Covery świetnie działają w obu formatach! Poziomo na YouTube z pełnym kadrem, pionowo na TikToku z bliska — tu liczy się platforma docelowa."
+  },
+  {
+    title: "🏋️ Trening na siłowni — pokazujesz ćwiczenia",
+    hint: "Robisz przysiady, pompki, martwy ciąg przy lustrze...",
+    best: "both",
+    explanation: "Oba formaty są popularne! Pionowo na Reels/TikTok (pełna sylwetka), poziomo na YouTube (widać technikę z boku). Wybierz pod platformę."
+  },
+  {
+    title: "🎄 Dekorowanie choinki — timelapse",
+    hint: "Choinka rośnie w dekoracje, od pustej do pełnej ozdób...",
+    best: "both",
+    explanation: "Choinka jest wysoka (pion!), ale timelapse z całym pokojem wygląda super poziomo. Oba formaty mają sens — zależy co chcesz pokazać!"
+  },
+  {
+    title: "🐕 Spacer z psem w parku",
+    hint: "Pies biega, aportuje, bawi się z innymi psami...",
+    best: "both",
+    explanation: "Pies biega szeroko (poziomo!) ale na szybkie Story z trzymanego telefonu — pion jest naturalniejszy. Oba OK, zależy od platformy!"
+  },
+  {
+    title: "🎨 Malowanie obrazu — proces twórczy",
+    hint: "Pędzel na płótnie, kolory się mieszają, obraz powstaje...",
+    best: "both",
+    explanation: "Płótno może być poziome lub pionowe! Timelapse procesu na YouTube — poziomo. Krótki Reel z bliska — pionowo. Oba formaty pasują."
+  },
+];
+
+function ConfettiParticle({ color, delay }) {
+  return <div style={{
+    position: "absolute",
+    width: 8 + Math.random() * 8,
+    height: 8 + Math.random() * 8,
+    background: color,
+    borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+    left: `${Math.random() * 100}%`,
+    top: -20,
+    opacity: 0,
+    animation: `confettiFall 1.5s ${delay}s ease-out forwards`,
+    transform: `rotate(${Math.random() * 360}deg)`,
+  }} />;
+}
+
+function PhoneFrame({ orientation, active, children }) {
+  const isLandscape = orientation === "landscape";
+  const w = isLandscape ? 140 : 78;
+  const h = isLandscape ? 78 : 140;
+  return (
+    <div style={{
+      width: w, height: h,
+      borderRadius: 12,
+      border: `3px solid ${active ? ORANGE : "#ccc"}`,
+      background: active ? "linear-gradient(135deg, #1a1a2e, #16213e)" : "#e8e8e8",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      transform: active ? "scale(1.08)" : "scale(1)",
+      boxShadow: active ? `0 6px 24px ${ORANGE}44` : "0 2px 8px rgba(0,0,0,0.1)",
+      position: "relative",
+    }}>
+      <div style={{
+        position: "absolute",
+        top: isLandscape ? "50%" : 5,
+        left: isLandscape ? 5 : "50%",
+        transform: "translate(-50%, -50%)",
+        width: isLandscape ? 3 : 16,
+        height: isLandscape ? 16 : 3,
+        borderRadius: 2,
+        background: active ? "#ffffff33" : "#ccc",
+      }} />
+      <div style={{
+        fontSize: 10, color: active ? "#ffffffcc" : "#999",
+        fontWeight: 600, letterSpacing: 1, textTransform: "uppercase",
+      }}>{children}</div>
+    </div>
+  );
+}
+
+function BothIcon({ active }) {
+  return (
+    <div style={{
+      display: "flex", gap: 6, alignItems: "flex-end",
+      transform: active ? "scale(1.08)" : "scale(1)",
+      transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    }}>
+      <div style={{
+        width: 52, height: 32, borderRadius: 6,
+        border: `2px solid ${active ? ORANGE : "#ccc"}`,
+        background: active ? "linear-gradient(135deg, #1a1a2e, #16213e)" : "#e8e8e8",
+        boxShadow: active ? `0 4px 16px ${ORANGE}44` : "0 1px 4px rgba(0,0,0,0.08)",
+      }} />
+      <div style={{
+        width: 32, height: 52, borderRadius: 6,
+        border: `2px solid ${active ? ORANGE : "#ccc"}`,
+        background: active ? "linear-gradient(135deg, #1a1a2e, #16213e)" : "#e8e8e8",
+        boxShadow: active ? `0 4px 16px ${ORANGE}44` : "0 1px 4px rgba(0,0,0,0.08)",
+      }} />
+    </div>
+  );
+}
+
+const NUM_QUESTIONS = 8;
+
+export default function App() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [phase, setPhase] = useState("intro");
+  const [score, setScore] = useState({ correct: 0, total: 0 });
+  const [selected, setSelected] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [shuffledTopics, setShuffledTopics] = useState([]);
+
+  const startGame = () => {
+    const land = topics.filter(t => t.best === "landscape").sort(() => Math.random() - 0.5).slice(0, 3);
+    const port = topics.filter(t => t.best === "portrait").sort(() => Math.random() - 0.5).slice(0, 3);
+    const both = topics.filter(t => t.best === "both").sort(() => Math.random() - 0.5).slice(0, 2);
+    const all = [...land, ...port, ...both].sort(() => Math.random() - 0.5);
+    setShuffledTopics(all);
+    setCurrentIndex(0);
+    setScore({ correct: 0, total: 0 });
+    setSelected(null);
+    setPhase("question");
+  };
+
+  useEffect(() => {
+    const land = topics.filter(t => t.best === "landscape").sort(() => Math.random() - 0.5).slice(0, 3);
+    const port = topics.filter(t => t.best === "portrait").sort(() => Math.random() - 0.5).slice(0, 3);
+    const both = topics.filter(t => t.best === "both").sort(() => Math.random() - 0.5).slice(0, 2);
+    setShuffledTopics([...land, ...port, ...both].sort(() => Math.random() - 0.5));
+  }, []);
+
+  const currentTopic = shuffledTopics[currentIndex];
+
+  const isAnswerCorrect = (choice) => {
+    if (!currentTopic) return false;
+    if (currentTopic.best === "both") return true;
+    return choice === currentTopic.best;
+  };
+
+  const handleSelect = (choice) => {
+    if (selected) return;
+    setSelected(choice);
+    const correct = isAnswerCorrect(choice);
+    setScore(s => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
+    if (correct) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2000);
+    }
+    setTimeout(() => setPhase("reveal"), 400);
+  };
+
+  const handleNext = () => {
+    if (currentIndex + 1 >= shuffledTopics.length) {
+      setPhase("summary");
+    } else {
+      setCurrentIndex(i => i + 1);
+      setSelected(null);
+      setPhase("question");
+    }
+  };
+
+  // =========== INTRO ===========
+  if (phase === "intro") {
+    return (
+      <div style={S.container}>
+        <div style={S.card}>
+          <div style={{ fontSize: 52, marginBottom: 8 }}>📐</div>
+          <h1 style={S.introTitle}>Poziomo, pionowo<br/>czy jedno i drugie?</h1>
+          <p style={S.introSub}>
+            Zobaczycie tematy filmów. Zdecydujcie: nagrać
+            <strong style={{ color: ORANGE }}> poziomo (16:9)</strong>,
+            <strong style={{ color: PURPLE }}> pionowo (9:16)</strong>,
+            czy <strong style={{ color: GREEN }}> oba pasują</strong>?
+          </p>
+          <p style={S.introHint}>Dyskutujcie w grupie! Czasem oba formaty mają sens.</p>
+          <div style={{ display: "flex", gap: 24, justifyContent: "center", margin: "20px 0", flexWrap: "wrap" }}>
+            <div style={{ textAlign: "center" }}>
+              <PhoneFrame orientation="landscape" active={false}>16:9</PhoneFrame>
+              <div style={S.previewLabel}>Poziomo</div>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <PhoneFrame orientation="portrait" active={false}>9:16</PhoneFrame>
+              <div style={S.previewLabel}>Pionowo</div>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <BothIcon active={false} />
+              <div style={{ ...S.previewLabel, marginTop: 10 }}>Oba</div>
+            </div>
+          </div>
+          <button style={S.startBtn} onClick={startGame}>Zaczynamy! 🎬</button>
+        </div>
+        <style>{CSS}</style>
+      </div>
+    );
+  }
+
+  // =========== SUMMARY ===========
+  if (phase === "summary") {
+    const pct = Math.round((score.correct / score.total) * 100);
+    const emoji = pct >= 80 ? "🏆" : pct >= 50 ? "👍" : "💪";
+    return (
+      <div style={S.container}>
+        <div style={S.card}>
+          <div style={{ fontSize: 56, marginBottom: 4 }}>{emoji}</div>
+          <h1 style={{ ...S.introTitle, fontSize: 26 }}>Koniec gry!</h1>
+          <div style={S.scoreBig}>{score.correct}<span style={S.scoreSlash}>/{score.total}</span></div>
+          <p style={S.summaryMsg}>
+            {pct >= 80
+              ? "Macie oko reżysera! Wiecie, kiedy nagrywać poziomo, pionowo, a kiedy oba pasują."
+              : pct >= 50
+              ? "Nieźle! Już rozumiecie podstawy — format zależy od treści i platformy."
+              : "Dobry początek! Teraz wiecie, że format ma znaczenie. Praktyka uczy najlepiej!"}
+          </p>
+          <p style={{ fontSize: 13, color: "#999", textAlign: "center", margin: "8px 0 20px", lineHeight: 1.5 }}>
+            Pamiętajcie: ten sam temat może wymagać innego formatu na YouTube (16:9), TikToku (9:16) czy Instagramie (9:16 lub 1:1).
+          </p>
+          <button style={S.startBtn} onClick={startGame}>Zagraj ponownie 🔄</button>
+        </div>
+        <style>{CSS}</style>
+      </div>
+    );
+  }
+
+  // =========== QUESTION / REVEAL ===========
+  const correct = selected ? isAnswerCorrect(selected) : false;
+  const isBoth = currentTopic?.best === "both";
+
+  const getBtnStyle = (choice) => {
+    const base = { ...S.choiceBtn };
+    if (!selected) return base;
+    if (phase === "reveal") {
+      if (isBoth) {
+        // all three are correct
+        return { ...base, borderColor: GREEN, background: "#e8f5e9" };
+      }
+      if (choice === currentTopic.best) return { ...base, borderColor: GREEN, background: "#e8f5e9" };
+      if (choice === selected && choice !== currentTopic.best) return { ...base, borderColor: "#e53935", background: "#ffebee" };
+      return { ...base, opacity: 0.45 };
+    }
+    if (choice === selected) return { ...base, borderColor: ORANGE, background: "#fff8f0" };
+    return { ...base, opacity: 0.45 };
+  };
+
+  const getCheckmark = (choice) => {
+    if (phase !== "reveal") return null;
+    if (isBoth) return <span style={S.badge}>✅</span>;
+    if (choice === currentTopic.best) return <span style={S.badge}>✅</span>;
+    if (choice === selected && choice !== currentTopic.best) return <span style={S.badge}>❌</span>;
+    return null;
+  };
+
+  return (
+    <div style={S.container}>
+      {showConfetti && (
+        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 100 }}>
+          {Array.from({ length: 30 }).map((_, i) => (
+            <ConfettiParticle key={i} color={[ORANGE, PURPLE, "#FFD700", "#FF6B6B", "#4ECDC4"][i % 5]} delay={Math.random() * 0.5} />
+          ))}
+        </div>
+      )}
+
+      {/* progress */}
+      <div style={S.topBar}>
+        <div style={{ display: "flex", gap: 6 }}>
+          {shuffledTopics.map((_, i) => (
+            <div key={i} style={{
+              width: 10, height: 10, borderRadius: "50%",
+              background: i < currentIndex ? ORANGE : i === currentIndex ? PURPLE : "#ddd",
+              transform: i === currentIndex ? "scale(1.4)" : "scale(1)",
+              transition: "all 0.3s",
+            }} />
+          ))}
+        </div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: PURPLE }}>✅ {score.correct}/{score.total}</div>
+      </div>
+
+      <div style={S.card}>
+        <div style={S.qNum}>Pytanie {currentIndex + 1} / {shuffledTopics.length}</div>
+        <h2 style={S.topicTitle}>{currentTopic?.title}</h2>
+        <p style={S.topicHint}>{currentTopic?.hint}</p>
+
+        <div style={S.choicesGrid}>
+          {/* Landscape */}
+          <button style={getBtnStyle("landscape")} onClick={() => handleSelect("landscape")} disabled={!!selected}>
+            <PhoneFrame orientation="landscape" active={
+              selected === "landscape" || (phase === "reveal" && (currentTopic.best === "landscape" || isBoth))
+            }>16:9</PhoneFrame>
+            <span style={S.choiceLabel}>Poziomo</span>
+            {getCheckmark("landscape")}
+          </button>
+
+          {/* Portrait */}
+          <button style={getBtnStyle("portrait")} onClick={() => handleSelect("portrait")} disabled={!!selected}>
+            <PhoneFrame orientation="portrait" active={
+              selected === "portrait" || (phase === "reveal" && (currentTopic.best === "portrait" || isBoth))
+            }>9:16</PhoneFrame>
+            <span style={S.choiceLabel}>Pionowo</span>
+            {getCheckmark("portrait")}
+          </button>
+
+          {/* Both */}
+          <button style={getBtnStyle("both")} onClick={() => handleSelect("both")} disabled={!!selected}>
+            <BothIcon active={
+              selected === "both" || (phase === "reveal" && isBoth)
+            } />
+            <span style={{ ...S.choiceLabel, marginTop: 4 }}>Oba pasują</span>
+            {getCheckmark("both")}
+          </button>
+        </div>
+
+        {phase === "reveal" && (
+          <div style={{
+            ...S.revealBox,
+            background: correct ? "#e8f5e9" : "#fff3e0",
+            borderColor: correct ? GREEN : ORANGE,
+            animation: "slideUp 0.4s ease-out",
+          }}>
+            <div style={{ fontSize: 18, marginBottom: 6, fontWeight: 800 }}>
+              {correct
+                ? (isBoth && selected !== "both"
+                    ? "🎉 Też dobrze! Ale oba formaty pasują!"
+                    : "🎉 Brawo!")
+                : "🤔 Nie tym razem!"}
+            </div>
+            {isBoth && phase === "reveal" && (
+              <div style={S.bothTag}>OBA FORMATY SĄ POPRAWNE</div>
+            )}
+            <p style={S.explText}>{currentTopic.explanation}</p>
+            <button style={S.nextBtn} onClick={handleNext}>
+              {currentIndex + 1 >= shuffledTopics.length ? "Zobacz wynik 🏁" : "Następne pytanie →"}
+            </button>
+          </div>
+        )}
+      </div>
+      <style>{CSS}</style>
+    </div>
+  );
+}
+
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
+  @keyframes confettiFall {
+    0% { opacity:1; transform:translateY(0) rotate(0deg); }
+    100% { opacity:0; transform:translateY(600px) rotate(720deg); }
+  }
+  @keyframes slideUp {
+    from { opacity:0; transform:translateY(20px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  button:hover:not(:disabled) { filter: brightness(1.04); transform: translateY(-1px); }
+  button:active:not(:disabled) { transform: translateY(0); }
+`;
+
+const S = {
+  container: {
+    minHeight: "100vh",
+    background: "linear-gradient(160deg, #f8f6ff 0%, #fff8f0 100%)",
+    fontFamily: "'Nunito', sans-serif",
+    display: "flex", flexDirection: "column", alignItems: "center",
+    padding: "20px 16px",
+  },
+  card: {
+    background: "white",
+    borderRadius: 24,
+    padding: "32px 24px",
+    maxWidth: 580,
+    width: "100%",
+    textAlign: "center",
+    boxShadow: "0 8px 40px rgba(111,73,157,0.11)",
+  },
+  introTitle: {
+    fontSize: 28, fontWeight: 900, color: PURPLE,
+    margin: "0 0 12px", lineHeight: 1.25,
+  },
+  introSub: {
+    fontSize: 15, color: "#444", lineHeight: 1.6, margin: "0 0 6px",
+  },
+  introHint: {
+    fontSize: 13, color: "#999", fontStyle: "italic", margin: "0 0 12px",
+  },
+  previewLabel: {
+    fontSize: 12, fontWeight: 700, color: "#666", marginTop: 6,
+  },
+  startBtn: {
+    background: `linear-gradient(135deg, ${ORANGE}, #e0710a)`,
+    color: "white", border: "none", borderRadius: 16,
+    padding: "13px 34px", fontSize: 17, fontWeight: 800,
+    fontFamily: "'Nunito',sans-serif", cursor: "pointer",
+    boxShadow: `0 4px 20px ${ORANGE}55`,
+  },
+  topBar: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    width: "100%", maxWidth: 580, marginBottom: 14,
+  },
+  qNum: {
+    fontSize: 11, fontWeight: 700, color: PURPLE,
+    textTransform: "uppercase", letterSpacing: 2, marginBottom: 6,
+  },
+  topicTitle: {
+    fontSize: 22, fontWeight: 900, color: "#1a1a2e",
+    margin: "0 0 6px", lineHeight: 1.3,
+  },
+  topicHint: {
+    fontSize: 14, color: "#888", fontStyle: "italic",
+    margin: "0 0 20px", lineHeight: 1.5,
+  },
+  choicesGrid: {
+    display: "flex", justifyContent: "center", gap: 12,
+    flexWrap: "wrap",
+  },
+  choiceBtn: {
+    background: "white", border: "2px solid #e4e4e4",
+    borderRadius: 18, padding: "16px 18px", cursor: "pointer",
+    display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+    transition: "all 0.3s", position: "relative",
+    fontFamily: "'Nunito',sans-serif", minWidth: 120,
+  },
+  choiceLabel: {
+    fontSize: 14, fontWeight: 800, color: "#333",
+  },
+  badge: {
+    position: "absolute", top: -8, right: -8, fontSize: 20,
+  },
+  revealBox: {
+    marginTop: 22, padding: "18px 18px 14px",
+    borderRadius: 16, border: "2px solid", textAlign: "center",
+  },
+  bothTag: {
+    display: "inline-block",
+    background: GREEN, color: "white",
+    fontSize: 11, fontWeight: 800, letterSpacing: 1.5,
+    padding: "4px 14px", borderRadius: 20, marginBottom: 8,
+  },
+  explText: {
+    fontSize: 14, color: "#444", lineHeight: 1.6, margin: "0 0 14px",
+  },
+  nextBtn: {
+    background: PURPLE, color: "white", border: "none",
+    borderRadius: 12, padding: "10px 22px", fontSize: 14, fontWeight: 700,
+    fontFamily: "'Nunito',sans-serif", cursor: "pointer",
+  },
+  scoreBig: {
+    fontSize: 48, fontWeight: 900, color: ORANGE, margin: "8px 0 12px",
+  },
+  scoreSlash: {
+    fontSize: 30, fontWeight: 700, color: "#ccc",
+  },
+  summaryMsg: {
+    fontSize: 15, color: "#444", lineHeight: 1.6, margin: 0,
+  },
+};
